@@ -3,7 +3,14 @@ pragma solidity ^0.8.18;
 
 import {PriceConverter} from "./PriceConverter.sol";
 
+error NotOwner();
+
 contract FundMe {
+    /* gas optimization:
+        1. constant
+        2. immutable
+    */
+
     using PriceConverter for uint256;
 
     uint256 public constant MINIMUM_USD = 5e18;
@@ -48,8 +55,16 @@ contract FundMe {
     }
 
     modifier onlyOwner {
-        require(msg.sender == i_owner, "Not Owner");
+        // require(msg.sender == i_owner, "Not Owner");
+        if (msg.sender != i_owner) {revert NotOwner();}
         _;
+    }
 
+    receive() external payable { 
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
     }
 }
